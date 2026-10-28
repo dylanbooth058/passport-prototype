@@ -858,6 +858,7 @@ app.addEventListener("submit",e=>{
   let sc=null; try{ sc=new URLSearchParams(location.search).get("screen"); }catch(e){}
   if(!sc) return;
   window.__noSave=true; S=seed();
+  try{ document.documentElement.setAttribute("data-theme", new URLSearchParams(location.search).get("theme")==="dark"?"dark":"light"); }catch(e){}
   const [sam,ava,jamie]=S.passports;
   const parent=r=>{ S.role="parent"; S.signedIn=true; S.route=r; };
   const teacher=r=>{ S.role="teacher"; S.teacherVerified=true; S.teacherPid=ava.id; S.route=r; };
