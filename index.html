@@ -1,0 +1,898 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>School Accessibility Passport Prototype</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;700;800&family=Carlito:ital,wght@0,400;0,700;1,400&family=Lexend:wght@400;600&display=swap">
+<style>
+/* Layout: branded app shell (prototype strip, header, one centred column per screen); ADHD Scotland teal for actions, purple for identity and the AI */
+:root{
+  --bg:#f6f9f9; --surface:#ffffff; --surface-2:#eef6f6; --ink:#1d1d1d; --text:#8b8d8e; --muted:#878787;
+  --line:#d3dede; --line-soft:#e5eded; --teal:#0d9ea2; --teal-strong:#0a7f83; --teal-hover:#3fb3b6; --magenta:#d7368c; --magenta-tint:#fbe8f2; --teal-bright:#0d9ea2; --teal-tint:#e2f2f2;
+  --purple:#82368c; --purple-tint:#f6eef7; --purple-line:#dcc4df; --on-accent:#1d1d1d;
+  --note-bg:#fff4e2; --note-ink:#7a4300; --ok:#1d6b3b; --ok-bg:#e5f3ea; --bad:#a23a2a; --bad-bg:#fbe9e6;
+  --font:Calibri,Carlito,"Segoe UI",sans-serif; --font-head:"Gotham Rounded",Nunito,"Trebuchet MS",sans-serif; --lh:1.55;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#111717; --surface:#1a2222; --surface-2:#212d2d; --ink:#eef3f3; --text:#d0d8d8; --muted:#a6b1b1;
+  --line:#34403f; --line-soft:#2a3434; --teal:#3cbcbf; --teal-strong:#64cfd1; --teal-bright:#0d9ea2; --teal-tint:#173637;
+  --purple:#cf92d6; --purple-tint:#2b1f2e; --purple-line:#5a3d60; --on-accent:#05211f; --teal-hover:#64cfd1; --magenta:#ec7ab5; --magenta-tint:#3a1a2b;
+  --note-bg:#33270f; --note-ink:#f2c98a; --ok:#8fd6a8; --ok-bg:#16301f; --bad:#f0a497; --bad-bg:#3a1d18; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#111717; --surface:#1a2222; --surface-2:#212d2d; --ink:#eef3f3; --text:#d0d8d8; --muted:#a6b1b1;
+  --line:#34403f; --line-soft:#2a3434; --teal:#3cbcbf; --teal-strong:#64cfd1; --teal-bright:#0d9ea2; --teal-tint:#173637;
+  --purple:#cf92d6; --purple-tint:#2b1f2e; --purple-line:#5a3d60; --on-accent:#05211f; --teal-hover:#64cfd1; --magenta:#ec7ab5; --magenta-tint:#3a1a2b;
+  --note-bg:#33270f; --note-ink:#f2c98a; --ok:#8fd6a8; --ok-bg:#16301f; --bad:#f0a497; --bad-bg:#3a1d18; color-scheme:dark}
+/* Reader settings chosen inside the app */
+.app.bg-cream{--bg:#f7f0dc; --surface:#fffbef; --surface-2:#f3ead2; --line:#e0d5b8; --line-soft:#ece3c9; color-scheme:light;
+  --ink:#1d1d1d; --text:#8b8d8e; --muted:#878787; --teal:#0d9ea2; --teal-strong:#0a7f83; --teal-hover:#3fb3b6; --teal-tint:#e6efe4; --purple:#82368c; --purple-tint:#f4ead8; --on-accent:#1d1d1d; --magenta:#d7368c; --magenta-tint:#f7e3e6}
+.app.bg-blue{--bg:#e6eff8; --surface:#f4f8fd; --surface-2:#dde8f4; --line:#c6d5e6; --line-soft:#d6e2ef; color-scheme:light;
+  --ink:#1d1d1d; --text:#8b8d8e; --muted:#878787; --teal:#0d9ea2; --teal-strong:#0a7f83; --teal-hover:#3fb3b6; --teal-tint:#dcecf0; --purple:#7b3285; --purple-tint:#ece4f3; --on-accent:#1d1d1d; --magenta:#d7368c; --magenta-tint:#f2e3ef}
+.app.bg-dark{--bg:#111717; --surface:#1a2222; --surface-2:#212d2d; --ink:#eef3f3; --text:#d0d8d8; --muted:#a6b1b1;
+  --line:#34403f; --line-soft:#2a3434; --teal:#3cbcbf; --teal-strong:#64cfd1; --teal-tint:#173637;
+  --purple:#cf92d6; --purple-tint:#2b1f2e; --purple-line:#5a3d60; --on-accent:#05211f; --teal-hover:#64cfd1; --magenta:#ec7ab5; --magenta-tint:#3a1a2b; color-scheme:dark}
+.app.font-dys{--font:"Lexend","Verdana",sans-serif; --font-head:"Lexend","Verdana",sans-serif}
+.app.reduce *{transition:none!important;animation:none!important}
+
+*{box-sizing:border-box}
+html{font-size:100%}
+body{background:var(--bg);color:var(--text);font-family:var(--font)}
+.app{min-height:100vh;background:var(--bg);color:var(--text);font-family:var(--font);font-size:1rem;line-height:var(--lh)}
+a{color:var(--teal)} a:hover{color:var(--teal-strong)}
+h1,h2,h3{color:var(--ink);margin:0;line-height:1.25;text-wrap:balance;font-family:var(--font-head)}
+h1{font-size:1.9rem;font-weight:700} h2{font-size:1.25rem;font-weight:700} h3{font-size:1.06rem;font-weight:600}
+p{margin:0}
+button,input,select,textarea{font:inherit;color:inherit}
+:focus-visible{outline:3px solid var(--teal-bright);outline-offset:2px;border-radius:4px}
+.muted{color:var(--muted);font-size:.9rem}
+.gutter{padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+
+/* Prototype strip */
+.proto{background:var(--note-bg);color:var(--note-ink);font-size:.86rem;border-bottom:1px solid var(--line)}
+.proto .in{max-width:1180px;margin:0 auto;display:flex;flex-wrap:wrap;gap:8px 18px;align-items:center;justify-content:space-between;padding-block:8px}
+.proto strong{font-weight:700}
+.seg{display:inline-flex;border:1px solid currentColor;border-radius:999px;overflow:hidden}
+.seg button{background:transparent;border:0;padding:6px 14px;min-height:34px;cursor:pointer;color:inherit;font-weight:600;font-size:.85rem}
+.seg button[aria-pressed="true"]{background:var(--note-ink);color:var(--note-bg)}
+.linkbtn{background:none;border:0;padding:0;color:inherit;text-decoration:underline;cursor:pointer;font-size:.85rem}
+
+/* Header */
+.hdr{background:var(--surface);border-bottom:6px solid var(--teal-bright);border-image:linear-gradient(90deg,var(--teal-bright) 0 34%,var(--purple) 34% 67%,var(--magenta) 67%) 1}
+.hdr .in{max-width:1180px;margin:0 auto;display:flex;flex-wrap:wrap;gap:12px 24px;align-items:center;justify-content:space-between;padding-block:12px}
+.brand{display:flex;align-items:center;gap:14px;text-decoration:none;color:var(--purple);font-weight:700;font-size:1.05rem;font-family:var(--font-head);background:none;border:0;cursor:pointer;padding:0}
+.brand .chip{background:#fff;border-radius:8px;padding:4px 6px;display:flex}
+.brand img{height:52px;width:auto;display:block}
+.nav{display:flex;flex-wrap:wrap;gap:6px 18px;align-items:center;font-weight:600}
+.nav button{background:none;border:0;cursor:pointer;color:var(--text);font-weight:600;padding:8px 2px;min-height:40px}
+.nav button[aria-current="page"]{color:var(--teal);box-shadow:inset 0 -3px 0 var(--teal-bright)}
+.nav .who{color:var(--muted);font-weight:400;font-size:.9rem}
+
+main{max-width:1180px;margin:0 auto;padding-block:32px 72px;display:flex;flex-direction:column;gap:24px}
+.narrow{max-width:880px}
+.stack{display:flex;flex-direction:column;gap:12px}
+.row{display:flex;flex-wrap:wrap;gap:12px;align-items:center}
+.between{justify-content:space-between}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px}
+.split{display:flex;flex-wrap:wrap;gap:24px;align-items:flex-start}
+.split > .main{flex:999 1 540px;min-width:0;display:flex;flex-direction:column;gap:16px}
+.split > .side{flex:1 1 300px;min-width:0;display:flex;flex-direction:column;gap:16px}
+
+.card{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:22px;display:flex;flex-direction:column;gap:14px}
+.card.hl{border:2px solid var(--teal)}
+.lede{font-size:1.08rem;max-width:62ch}
+
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:0 18px;border-radius:5px;border:1.5px solid var(--teal);background:var(--surface);color:var(--teal);font-weight:700;font-size:.95rem;cursor:pointer;text-decoration:none;transition:background .15s}
+.btn:hover{background:var(--teal-tint);color:var(--teal-strong)}
+.btn.primary{background:var(--teal);color:var(--on-accent)}
+.btn.primary:hover{background:var(--teal-hover);color:var(--on-accent)}
+.btn.quiet{border-color:var(--line);color:var(--text);font-weight:600}
+.btn.on{background:var(--teal-tint);border-color:var(--teal)}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.btn svg{width:18px;height:18px}
+
+.field{display:flex;flex-direction:column;gap:6px;font-size:.9rem;font-weight:600;color:var(--ink)}
+.field input,.field select,.field textarea,textarea.ta{font-weight:400;padding:10px 12px;border:1px solid var(--line);border-radius:5px;background:var(--surface);color:var(--text);width:100%;line-height:var(--lh)}
+.field textarea,textarea.ta{min-height:96px;resize:vertical}
+.hint{font-weight:400;color:var(--muted);font-size:.82rem}
+.check{display:flex;gap:10px;align-items:flex-start;line-height:1.45;cursor:pointer}
+.check input{width:20px;height:20px;margin:1px 0 0;flex:none;accent-color:var(--teal)}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip-opt{display:inline-flex;align-items:center;gap:8px;min-height:40px;padding:0 14px;border:1px solid var(--line);border-radius:999px;font-size:.9rem;cursor:pointer;background:var(--surface)}
+.chip-opt input{margin:0;width:16px;height:16px;accent-color:var(--teal)}
+.chip-opt:has(input:checked){border-color:var(--teal);background:var(--teal-tint);color:var(--ink)}
+fieldset{border:0;padding:0;margin:0;min-width:0}
+legend{padding:0;font-weight:600;color:var(--ink);margin-bottom:10px}
+
+.tag{display:inline-flex;align-items:center;gap:6px;padding:2px 10px;border-radius:999px;font-size:.8rem;font-weight:600;border:1px solid var(--line);white-space:nowrap;background:var(--surface)}
+.tag.draft{border-style:dashed}
+.tag.teacher{background:var(--purple-tint);border-color:var(--purple-line);color:var(--purple)}
+.tag.sign{background:var(--magenta-tint);border-color:var(--magenta);color:var(--ink)}
+.tag.agreed{background:var(--ok-bg);border-color:var(--ok);color:var(--ok)}
+.tag.theme{background:var(--surface-2)}
+.lock{display:inline-flex;gap:6px;align-items:center;font-size:.85rem;color:var(--muted);font-weight:600}
+.lock svg{width:16px;height:16px}
+
+.steps{display:flex;flex-wrap:wrap;gap:8px;list-style:none;margin:0;padding:0}
+.steps li button{padding:7px 14px;border-radius:999px;border:1px solid var(--line);font-size:.86rem;background:var(--surface);color:var(--text);cursor:pointer;min-height:36px}
+.steps li button[aria-current="step"]{background:var(--teal);border-color:var(--teal);color:var(--on-accent);font-weight:700}
+.steps li button.done{border-color:var(--teal);color:var(--teal);font-weight:600}
+.counter{position:sticky;top:env(safe-area-inset-top,0px);z-index:2;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:12px 18px;display:flex;flex-wrap:wrap;gap:8px 16px;justify-content:space-between;align-items:center}
+.meter{height:8px;background:var(--line-soft);border-radius:4px;overflow:hidden;min-width:120px;flex:1;max-width:220px}
+.meter span{display:block;height:100%;background:var(--magenta)}
+
+table.needs{width:100%;border-collapse:collapse}
+table.needs th{font-size:.8rem;color:var(--muted);font-weight:600;padding:6px 8px;border-bottom:1px solid var(--line);text-align:center;width:90px}
+table.needs th:first-child{text-align:left;padding-left:0;width:auto}
+table.needs td{padding:10px 8px;border-bottom:1px solid var(--line-soft);text-align:center}
+table.needs td:first-child{text-align:left;padding-left:0;line-height:1.4}
+table.needs tr:last-child td{border-bottom:0}
+table.needs input{width:22px;height:22px;accent-color:var(--teal);cursor:pointer}
+
+.sugg{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:18px 20px;display:flex;flex-direction:column;gap:10px}
+.sugg.kept{border:2px solid var(--teal)}
+.sugg.rejected{background:var(--surface-2)}
+.sugg.rejected h3{text-decoration:line-through;color:var(--muted)}
+.sugg .for{display:flex;flex-wrap:wrap;gap:8px;align-items:center;font-size:.86rem;color:var(--muted)}
+.why{background:var(--surface-2);border-radius:8px;padding:10px 14px;font-size:.95rem}
+.acts{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.ai{border:1.5px dashed var(--purple);background:var(--purple-tint);border-radius:10px;padding:18px;display:flex;flex-direction:column;gap:12px}
+.ai-label{font-size:.75rem;font-weight:700;color:var(--purple);letter-spacing:.06em;text-transform:uppercase}
+.thread{display:flex;flex-direction:column;gap:10px;max-height:420px;overflow-y:auto}
+.msg{padding:10px 14px;border-radius:12px;font-size:.95rem;max-width:92%}
+.msg.bot{background:var(--surface);border:1px solid var(--purple-line);align-self:flex-start}
+.msg.me{background:var(--teal);color:var(--on-accent);align-self:flex-end}
+.thinking{display:inline-flex;gap:4px}
+.thinking i{width:7px;height:7px;border-radius:50%;background:var(--purple);opacity:.4;animation:blink 1.2s infinite}
+.thinking i:nth-child(2){animation-delay:.2s}.thinking i:nth-child(3){animation-delay:.4s}
+@keyframes blink{50%{opacity:1}}
+@media (prefers-reduced-motion: reduce){*{animation:none!important;transition:none!important}}
+
+.disclaimer{border:1px solid var(--line);border-left-width:1px;background:var(--surface);border-radius:8px;padding:12px 16px;font-size:.9rem}
+.banner{border:2px solid var(--teal);border-radius:10px;background:var(--surface);padding:18px 22px;display:flex;flex-wrap:wrap;gap:12px 20px;align-items:center;justify-content:space-between}
+.banner.sign{border-color:var(--magenta);background:var(--magenta-tint);color:var(--ink)}
+.banner.sign strong{color:inherit}
+.list{list-style:none;margin:0;padding:0}
+.list li{display:flex;flex-wrap:wrap;justify-content:space-between;gap:6px 16px;padding:12px 0;border-bottom:1px solid var(--line-soft)}
+.list li:last-child{border-bottom:0}
+.tl{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:12px;font-size:.92rem}
+.tl li{display:flex;gap:12px}
+.tl .dot{width:10px;height:10px;border-radius:50%;background:var(--magenta);margin-top:6px;flex:none}
+.cmt{border-top:1px solid var(--line-soft);padding-top:10px;display:flex;flex-direction:column;gap:6px;font-size:.95rem}
+.opt{display:flex;gap:10px;align-items:center;min-height:44px;padding:0 14px;border:1px solid var(--line);border-radius:8px;cursor:pointer;background:var(--surface)}
+.opt:has(input:checked){border-color:var(--teal);background:var(--teal-tint)}
+.opt input{margin:0;width:18px;height:18px;accent-color:var(--teal)}
+.choice{display:flex;gap:12px;align-items:flex-start;padding:16px;border:1px solid var(--line);border-radius:10px;background:var(--surface);cursor:pointer}
+.choice:has(input:checked){border:2px solid var(--teal)}
+.choice input{width:20px;height:20px;margin:2px 0 0;flex:none;accent-color:var(--teal)}
+.code{width:48px;height:56px;text-align:center;font-size:1.4rem;border:1px solid var(--line);border-radius:5px;background:var(--surface)}
+.stat{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:16px 20px;display:flex;flex-direction:column;gap:2px}
+.stat strong{font-size:1.8rem;color:var(--ink);font-variant-numeric:tabular-nums}
+.tablewrap{overflow-x:auto}
+table.pupils{width:100%;border-collapse:collapse;min-width:560px}
+table.pupils th{text-align:left;font-size:.8rem;color:var(--muted);font-weight:600;padding:8px 12px;border-bottom:1px solid var(--line)}
+table.pupils td{padding:12px;border-bottom:1px solid var(--line-soft)}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(20px + env(safe-area-inset-bottom,0px));background:var(--ink);color:var(--bg);padding:12px 18px;border-radius:8px;font-weight:600;z-index:20;max-width:calc(100% - 32px)}
+.email{background:var(--surface);border:1px solid var(--line);border-radius:10px;overflow:hidden}
+.email .meta{padding:14px 20px;border-bottom:1px solid var(--line-soft);font-size:.88rem;display:flex;flex-direction:column;gap:2px;background:var(--surface-2)}
+.email .body{padding:22px;display:flex;flex-direction:column;gap:14px}
+.sr{position:absolute;left:-9999px}
+footer.ft{border-top:1px solid var(--line);background:var(--surface)}
+footer.ft .in{max-width:1180px;margin:0 auto;padding-block:18px;display:flex;flex-wrap:wrap;gap:8px 20px;font-size:.88rem;color:var(--muted)}
+</style>
+</head>
+<body style="margin:0">
+<div id="app" class="app"></div>
+<div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
+
+<script>
+const LOGO = "data:image/png;base64,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";
+const KEY = "passport-prototype-v1";
+
+/* ---------- Content: needs and the mock AI's suggestion library ---------- */
+const THEMES = [
+  {id:"social", label:"Social & emotional"},
+  {id:"learning", label:"Learning & educational"},
+  {id:"sensory", label:"Sensory & environmental"}
+];
+const NEEDS = [
+  {id:"feelings", theme:"social", label:"Big feelings, meltdowns or shutdowns"},
+  {id:"masking", theme:"social", label:"Holds it together at school, then falls apart at home"},
+  {id:"friends", theme:"social", label:"Finds friendships or group work hard"},
+  {id:"worry", theme:"social", label:"Worries a lot about school"},
+  {id:"writing", theme:"learning", label:"Long pieces of writing"},
+  {id:"reading", theme:"learning", label:"Reading a lot of text, or takes longer to process it"},
+  {id:"starting", theme:"learning", label:"Starting or finishing tasks"},
+  {id:"instructions", theme:"learning", label:"Remembering instructions with several steps"},
+  {id:"focus", theme:"learning", label:"Sitting still or staying focused"},
+  {id:"noise", theme:"sensory", label:"Noise, or busy rooms"},
+  {id:"clothing", theme:"sensory", label:"Uniform, clothing or textures"},
+  {id:"toilet", theme:"sensory", label:"Noticing when they need the toilet"},
+  {id:"coordination", theme:"sensory", label:"Coordination, often bumps into things"},
+  {id:"transitions", theme:"sensory", label:"Changes to routine, or moving between activities"}
+];
+const LIB = {
+  feelings:[
+    ["A calm space they can go to without having to ask","When feelings get big, having to explain first makes it worse. A known place to reset helps them come back to learning sooner."],
+    ["A shared calm-down plan used at home and at school","The same words and steps in both places make it easier for them to recognise what's happening and what helps."]],
+  masking:[
+    ["A quiet space at break and lunch","Holding it together all day is exhausting. Some quiet time lets them recharge before the afternoon."],
+    ["A short check-in with a trusted adult at the end of the day","A few minutes to offload before home time can stop the day spilling over at home."],
+    ["Lighter homework on hard days, agreed in advance","Homework often lands when they have nothing left. An agreed fallback removes a big source of evening stress."]],
+  friends:[
+    ["Teacher picks groups and gives them a clear role","Choosing groups and working out 'what do I do?' causes a lot of worry. A set role removes the guesswork."],
+    ["A structured lunchtime club or activity","Open playtimes can be hard to navigate. A shared activity gives an easy way to be with others."]],
+  worry:[
+    ["A heads-up before changes like supply teachers or trips","Surprises feed worry. Knowing in advance gives them time to prepare."],
+    ["A visual timetable for the day","Seeing what's coming next makes the day feel more predictable and less worrying."]],
+  writing:[
+    ["Show learning in other ways: typing, mind maps or talking it through","The effort of writing can block what they actually know. Other ways let the teacher see their understanding."],
+    ["Writing frames or sentence starters","A blank page is hard to start. A frame gives structure so they can focus on ideas."]],
+  reading:[
+    ["Key texts shared in advance, with extra time","Getting a head start means they can take the time they need without falling behind in class."],
+    ["Text read aloud, or audio versions where possible","Listening lets them take in the content without the extra effort of decoding it."]],
+  starting:[
+    ["Break work into small steps with a short checklist","A big task can feel impossible to start. Seeing just the next step makes it easier to begin."],
+    ["A visual timer showing how long is left","Seeing time pass makes the task feel finite and helps with pacing."]],
+  instructions:[
+    ["Instructions written down as well as said out loud","Spoken instructions disappear. Written ones can be checked again without having to ask."],
+    ["A quick check-in after instructions to confirm the first step","Making sure they know where to start stops them losing the first ten minutes."]],
+  focus:[
+    ["Short movement breaks, asked for with a quiet signal card","Moving resets attention. A card means they don't have to ask in front of the class."],
+    ["A fidget tool allowed at the desk","Keeping hands busy can help the brain stay on task."],
+    ["Seat away from doors and windows","Fewer distractions nearby makes it easier to stay with the lesson."]],
+  noise:[
+    ["Ear defenders allowed in noisy lessons and assemblies","Cutting background noise reduces overload so they can stay in the room."],
+    ["Leave a few minutes early to avoid busy corridors","Crowded corridors can be overwhelming. A quieter journey means they arrive ready to learn."]],
+  clothing:[
+    ["Flexibility on uniform fabrics and labels","Uncomfortable clothes can take up their whole attention. Small changes remove a constant distraction."],
+    ["Wear PE kit all day on PE days","Avoiding a rushed change removes a stressful moment from the day."]],
+  toilet:[
+    ["A toilet pass they can use without asking","Their body signals can come late. Being able to go straight away avoids accidents and embarrassment."],
+    ["Gentle reminders to go at set times","Regular reminders help when the 'I need to go' signal is easy to miss."]],
+  coordination:[
+    ["Extra time for changing and practical tasks","Coordination takes more effort for them. A little more time avoids rushing and accidents."],
+    ["Alternatives to handwriting-heavy tasks","Fine motor tasks are tiring. Other ways of recording save their energy for the learning."]],
+  transitions:[
+    ["A warning a few minutes before moving to a new activity","Switching suddenly is hard. A heads-up gives them time to finish and shift focus."],
+    ["A visual timetable showing any changes","Seeing changes in advance makes them less of a shock."]]
+};
+const PROMPTS = [
+  "What does a hard day look like, at school or at home?",
+  "When things get difficult, what helps?",
+  "What are they good at, or love doing?",
+  "What would they like their teacher to know about them?",
+  "Anything else?"
+];
+const STEPS = ["About your child","Needs","In your own words","Suggestions","Review & send"];
+
+/* ---------- State ---------- */
+let uid = 100;
+const nid = () => "id" + (uid++);
+const today = () => new Date().toLocaleDateString("en-GB",{day:"numeric",month:"short",year:"numeric"});
+function makeSugg(needId, alt=0){
+  const s = LIB[needId][alt];
+  const need = NEEDS.find(n=>n.id===needId);
+  return {id:nid(), needId, theme:need.theme, alt, title:s[0], why:s[1], status:"pending", feedback:"", note:"", source:"ai", teacher:{decision:"", comment:""}};
+}
+function blankPassport(){
+  return {id:nid(), example:false, step:1, status:"draft",
+    child:{first:"",last:"",dob:"",pref:""}, school:{name:"",year:"",teacher:"",email:""},
+    dx:{confirmed:[],suspected:[]}, parent:{name:"Alex Morgan",rel:"Parent"},
+    needs:{}, answers:["","","","",""], pasted:"", known:[],
+    suggestions:[], generated:false, chat:[], share:{dx:true, answers:false},
+    send:{review:"3 months", msg:"", withChild:false},
+    signoff:{teacher:null, parent:null}, history:[{t:today(), text:"Passport started"}]};
+}
+function seed(){
+  const sam = blankPassport();
+  Object.assign(sam,{example:true, status:"agreed", step:5, generated:true,
+    child:{first:"Sam",last:"Example",dob:"2016-03-14",pref:""}, school:{name:"Riverside Primary (example)",year:"Primary 5",teacher:"Ms Reid",email:"m.reid@riverside.example"},
+    dx:{confirmed:[],suspected:["ADHD"]}, needs:{starting:{school:true,home:false},writing:{school:true,home:true},focus:{school:true,home:false},masking:{school:false,home:true}},
+    known:[{id:nid(), text:"Ear defenders for assemblies"}]});
+  sam.suggestions=[makeSugg("starting"),makeSugg("focus"),makeSugg("writing"),makeSugg("masking")];
+  sam.suggestions.forEach(s=>{s.status="kept"; s.teacher.decision="yes";});
+  sam.suggestions[1].teacher={decision:"changes",comment:"Happy to. We'll make it a classroom job, like taking the register to the office, so it doesn't look different."};
+  sam.suggestions[3].teacher={decision:"no",comment:"We don't have a support assistant in P5, but I can check in with Sam myself on Fridays."};
+  sam.signoff={teacher:{name:"Ms Reid",role:"Class teacher",date:"3 Oct 2026",review:"2026-11-07"}, parent:{date:"4 Oct 2026"}};
+  sam.history=[{t:"4 Oct 2026",text:"Signed by Alex Morgan"},{t:"3 Oct 2026",text:"Signed by Ms Reid"},{t:"2 Oct 2026",text:"Ms Reid commented on 2 adjustments"},{t:"29 Sep 2026",text:"Sent to Riverside Primary"},{t:"28 Sep 2026",text:"Passport started"}];
+
+  const ava = blankPassport();
+  Object.assign(ava,{example:true, status:"with_teacher", step:5, generated:true,
+    child:{first:"Ava",last:"Example",dob:"2013-07-02",pref:""}, school:{name:"Hillview High (example)",year:"S2",teacher:"Mr Khan (Support for learning)",email:"a.khan@hillview.example"},
+    dx:{confirmed:["Autism"],suspected:[]}, needs:{noise:{school:true,home:false},worry:{school:true,home:true},transitions:{school:true,home:false},friends:{school:true,home:false}},
+    answers:["Busy corridors between lessons and changes she wasn't told about. She comes home exhausted and quiet.","Knowing what's coming, headphones, time alone after school.","Drawing, animals, and remembering facts about everything.","\"I'm not being rude when I don't answer straight away. I'm thinking.\"",""]});
+  ava.suggestions=[makeSugg("noise",1),makeSugg("worry"),makeSugg("transitions"),makeSugg("friends",1)];
+  ava.suggestions.forEach(s=>s.status="kept");
+  ava.history=[{t:"15 Oct 2026",text:"Sent to Hillview High"},{t:"12 Oct 2026",text:"Passport started"}];
+
+  const jamie = blankPassport();
+  Object.assign(jamie,{example:true, step:3,
+    child:{first:"Jamie",last:"Example",dob:"2019-11-20",pref:""}, school:{name:"Riverside Primary (example)",year:"Primary 2",teacher:"Mrs Shah",email:"r.shah@riverside.example"},
+    needs:{toilet:{school:true,home:true},transitions:{school:true,home:true},feelings:{school:false,home:true},instructions:{school:true,home:false}}});
+
+  return {role:"parent", route:"signin", signedIn:false, teacherVerified:false, teacherCode:"",
+    settings:{font:"standard", bg:"default", size:1, spacing:1, reduce:false},
+    passports:[sam,ava,jamie], current:null, teacherPid:null, review:{choice:"teacher"}};
+}
+let S;
+try { S = JSON.parse(localStorage.getItem(KEY)); } catch(e) { S = null; }
+if (!S || !S.passports) S = seed();
+S.loading = false; S.chatThinking = false;
+uid = 1000 + Math.floor(Math.random()*1000);
+function save(){ if(window.__noSave) return; try{ localStorage.setItem(KEY, JSON.stringify(S)); }catch(e){} }
+
+const P = () => S.passports.find(p=>p.id===S.current);
+const name = p => (p.child.pref || p.child.first || "your child");
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const needLabel = id => (NEEDS.find(n=>n.id===id)||{}).label || id;
+const themeLabel = id => ({social:"Social",learning:"Learning",sensory:"Sensory"}[id]||"Your own");
+const pickedNeeds = p => Object.entries(p.needs).filter(([k,v])=>v.school||v.home).map(([k])=>k);
+const where = v => v.school && v.home ? "school and home" : v.school ? "at school" : "at home";
+
+/* ---------- Icons ---------- */
+const I = {
+  lock:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>',
+  mic:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg>',
+  up:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M7 10v11M7 10l4-8a2 2 0 0 1 3 2l-1 5h6a2 2 0 0 1 2 2l-2 8a2 2 0 0 1-2 2H7"/></svg>',
+  down:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M17 14V3M17 14l-4 8a2 2 0 0 1-3-2l1-5H5a2 2 0 0 1-2-2l2-8a2 2 0 0 1 2-2h10"/></svg>',
+  redo:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M3 12a9 9 0 0 1 15-6.7L21 8M21 3v5h-5M21 12a9 9 0 0 1-15 6.7L3 16M3 21v-5h5"/></svg>'
+};
+
+/* ---------- Shell ---------- */
+function shell(inner){
+  const st = S.settings;
+  const parentNav = S.signedIn ? `
+    <nav class="nav" aria-label="Main">
+      <button data-go="home" ${["home","passport","review-due"].includes(S.route)?'aria-current="page"':''}>My passports</button>
+      <button data-go="settings" ${S.route==="settings"?'aria-current="page"':''}>Settings</button>
+      <span class="who">${esc(S.passports[0].parent.name)}</span>
+      <button data-act="signout">Sign out</button>
+    </nav>` : `<nav class="nav" aria-label="Main"><button data-go="signin" ${S.route==="signin"?'aria-current="page"':''}>Sign in</button><button data-go="register" ${S.route==="register"?'aria-current="page"':''}>Create account</button></nav>`;
+  const teacherNav = S.teacherVerified ? `
+    <nav class="nav" aria-label="Main">
+      <button data-go="t-home" ${S.route==="t-home"?'aria-current="page"':''}>My pupils</button>
+      <span class="who">Teacher view</span>
+      <button data-act="t-signout">Sign out</button>
+    </nav>` : `<nav class="nav" aria-label="Main"><span class="who">Teacher view</span></nav>`;
+  return `
+  <div class="proto gutter"><div class="in">
+    <span><strong>Prototype.</strong> Example data only. Nothing you type leaves this browser, and the AI suggestions are simulated.</span>
+    <span class="row" style="gap:10px">
+      <span>See it as</span>
+      <span class="seg" role="group" aria-label="See it as">
+        <button data-act="role" data-v="parent" aria-pressed="${S.role==="parent"}">Parent</button>
+        <button data-act="role" data-v="teacher" aria-pressed="${S.role==="teacher"}">Teacher</button>
+      </span>
+      <button class="linkbtn" data-act="reset">Reset demo</button>
+    </span>
+  </div></div>
+  <header class="hdr gutter"><div class="in">
+    <button class="brand" data-go="${S.role==="teacher" ? (S.teacherVerified?"t-home":"t-email") : (S.signedIn?"home":"signin")}" aria-label="School Accessibility Passport, home">
+      <span class="chip"><img src="${LOGO}" alt="ADHD Scotland"></span><span>School Accessibility Passport</span>
+    </button>
+    ${S.role==="teacher" ? teacherNav : parentNav}
+  </div></header>
+  <div class="gutter">${inner}</div>
+  <footer class="ft gutter"><div class="in"><span>A prototype for ADHD Scotland</span><span>Suggestions are not medical advice</span></div></footer>`;
+}
+function stepper(p, cur){
+  return `<ol class="steps" aria-label="Progress">${STEPS.map((s,i)=>{
+    const n=i+1, can = n<=p.step;
+    return `<li><button ${n===cur?'aria-current="step"':''} class="${n<cur?'done':''}" ${can?`data-step="${n}"`:'disabled'}>${n} ${s}${n<cur?' ✓':''}</button></li>`;}).join("")}</ol>`;
+}
+function navRow(back, next, nextLabel, extra=""){
+  return `<div class="row between">
+    ${back?`<button class="btn quiet" data-step="${back}">Back</button>`:`<span></span>`}
+    <div class="row">${extra}<button class="btn quiet" data-go="home">Save and finish later</button><button class="btn primary" data-step="${next}">${nextLabel}</button></div>
+  </div>`;
+}
+const statusTag = p => ({draft:'<span class="tag draft">Draft</span>', with_teacher:'<span class="tag teacher">With teacher</span>', teacher_signed:'<span class="tag sign">Ready for your signature</span>', agreed:'<span class="tag agreed">Agreed</span>'}[p.status]);
+
+/* ---------- Parent screens ---------- */
+const V = {};
+V.signin = () => `<main>
+  <div class="split">
+    <section class="main" style="gap:18px">
+      <h1>Help your child get the right support at school</h1>
+      <p class="lede">Tell us what your child finds hard, in your own words. We suggest adjustments the school could make. You and their teacher agree them together.</p>
+      <ol style="margin:0;padding-left:22px;display:flex;flex-direction:column;gap:8px">
+        <li>Answer a few questions with your child</li><li>Review suggested adjustments</li><li>Send to the teacher to agree and sign off</li><li>Get a reminder when it's time to review</li>
+      </ol>
+      <p class="muted">No diagnosis needed. Suggestions are a starting point for a face-to-face conversation, not medical advice.</p>
+      <div role="img" aria-label="Photo placeholder" style="border:1.5px dashed var(--line);border-radius:10px;min-height:200px;display:grid;place-items:center;text-align:center;padding:16px;color:var(--muted);font-size:.9rem;background:var(--surface)">Photo: real children or a family in Scotland, natural not posed, shown positively.<br>Consent form needed.</div>
+    </section>
+    <form class="card side" data-form="signin" style="max-width:440px" aria-labelledby="si-h">
+      <h2 id="si-h">Parent sign in</h2>
+      <label class="field">Email<input id="si-email" type="email" autocomplete="email" value="alex.morgan@example.com"></label>
+      <label class="field">Password<input id="si-pass" type="password" autocomplete="current-password" value="prototype"></label>
+      <p class="hint">This is a prototype. Any details will sign you in.</p>
+      <button class="btn primary" type="submit">Sign in</button>
+      <div class="row" style="gap:10px;color:var(--muted);font-size:.85rem"><span style="flex:1;height:1px;background:var(--line)"></span>or<span style="flex:1;height:1px;background:var(--line)"></span></div>
+      <button class="btn" type="button" data-act="signin">Continue with Microsoft</button>
+      <button class="btn" type="button" data-act="signin">Continue with Google</button>
+      <p>New here? <a href="#" data-go="register">Create an account</a></p>
+      <div style="border-top:1px solid var(--line);padding-top:14px" class="stack">
+        <h3>Are you a teacher?</h3>
+        <p class="muted">Open the link in the email you were sent. You'll confirm with a one-time code, no password needed. <a href="#" data-act="role" data-v="teacher">See the teacher side</a></p>
+      </div>
+    </form>
+  </div></main>`;
+
+V.register = () => `<main class="narrow" style="max-width:640px">
+  <div class="stack"><h1>Create your parent account</h1><p class="muted">You'll add your child's details next. Your account keeps their passport private to you and their teacher.</p></div>
+  <form class="card" data-form="register">
+    <div class="grid2"><label class="field">First name<input id="rg-first" value="Alex"></label><label class="field">Last name<input id="rg-last" value="Morgan"></label></div>
+    <label class="field">Email<input id="rg-email" type="email" value="alex.morgan@example.com"></label>
+    <label class="field">Password<input id="rg-pass" type="password" value="prototype-password"><span class="hint">At least 12 characters</span></label>
+    <label class="check"><input id="rg-terms" type="checkbox" checked><span>I agree to the terms and privacy notice. Personal details stay in the UK/EU and are never sent to the AI.</span></label>
+    <label class="check"><input id="rg-share" type="checkbox"><span>Optional: let ADHD Scotland use my child's needs, with no names or personal details, to improve suggestions for other families.</span></label>
+    <button class="btn primary" type="submit">Create account</button>
+  </form></main>`;
+
+V.home = () => {
+  const due = S.passports.find(p=>p.status==="agreed");
+  const toSign = S.passports.find(p=>p.status==="teacher_signed");
+  return `<main>
+  <div class="row between">
+    <div class="stack" style="gap:6px"><h1>Hello ${esc(S.passports[0].parent.name.split(" ")[0])}</h1><p class="muted">Each child has their own passport. Children marked "Example" are sample data you can play with.</p></div>
+    <button class="btn primary" data-act="new">+ Start a new passport</button>
+  </div>
+  ${toSign?`<section class="banner sign" aria-label="Action needed"><div class="stack" style="gap:4px"><strong>${esc(toSign.child.first)}'s teacher has signed. It's your turn.</strong><span>Check their comments, then sign to make it official.</span></div><button class="btn primary" data-open="${toSign.id}">Review and sign</button></section>`:""}
+  ${due?`<section class="banner" aria-label="Reminder"><div class="stack" style="gap:4px"><strong style="color:var(--ink)">${esc(due.child.first)}'s passport is due for review on ${fmtDate(due.signoff.teacher&&due.signoff.teacher.review)}</strong><span class="muted">Book a chat with the school and update anything that has changed.</span></div><button class="btn" data-review="${due.id}">Start review</button></section>`:""}
+  <section style="display:grid;grid-template-columns:repeat(auto-fit,minmax(290px,1fr));gap:20px" aria-label="Passports">
+    ${S.passports.map(p=>{
+      const kept = p.suggestions.filter(s=>s.status==="kept").length + p.known.length;
+      let body="", act="";
+      if(p.status==="draft"){ body=`<div class="stack" style="gap:6px"><span>Step ${p.step} of 5: ${STEPS[p.step-1]}</span><div class="meter" style="max-width:none" role="progressbar" aria-label="Progress" aria-valuenow="${p.step*20}" aria-valuemin="0" aria-valuemax="100"><span style="width:${p.step*20}%"></span></div></div>`; act=`<button class="btn primary" data-continue="${p.id}">Continue</button>`;}
+      else if(p.status==="with_teacher"){ body=`<p>Waiting for ${esc(p.school.teacher||"the teacher")} to review.</p>`; act=`<button class="btn" data-open="${p.id}">See status</button><button class="btn quiet" data-act="nudge">Send a reminder</button>`;}
+      else if(p.status==="teacher_signed"){ body=`<p>Signed by ${esc(p.signoff.teacher.name)}. Waiting for you.</p>`; act=`<button class="btn primary" data-open="${p.id}">Review and sign</button>`;}
+      else { body=`<p>${kept} adjustments · review by ${fmtDate(p.signoff.teacher&&p.signoff.teacher.review)}</p>`; act=`<button class="btn" data-open="${p.id}">View passport</button><button class="btn quiet" data-review="${p.id}">Update</button>`;}
+      return `<article class="card"><div class="row between"><h3>${esc(p.child.first||"New passport")}${p.example?' <span class="tag">Example</span>':''}</h3>${statusTag(p)}</div>
+        <p class="muted">${esc([p.school.year,p.school.name].filter(Boolean).join(" · ")||"No school added yet")}</p>${body}<div class="row">${act}</div></article>`;}).join("")}
+  </section>
+  <section class="card" aria-labelledby="act-h"><h2 id="act-h">Recent activity</h2>
+    <ul class="list">${S.passports.flatMap(p=>p.history.slice(0,2).map(h=>`<li><span>${esc(p.child.first||"New passport")}: ${esc(h.text)}</span><span class="muted">${esc(h.t)}</span></li>`)).slice(0,6).join("")}</ul>
+  </section></main>`;
+};
+function fmtDate(d){ if(!d) return "[date]"; const x=new Date(d); return isNaN(x)?d:x.toLocaleDateString("en-GB",{day:"numeric",month:"short",year:"numeric"}); }
+
+V.settings = () => { const st=S.settings; return `<main class="narrow">
+  <h1>Settings</h1>
+  <section class="card" aria-labelledby="disp-h">
+    <h2 id="disp-h">Display & reading</h2>
+    <p class="muted">Changes apply straight away. Try them.</p>
+    <fieldset><legend>Font</legend><div class="grid2">
+      <label class="opt"><input type="radio" name="font" data-set="font" value="standard" ${st.font==="standard"?"checked":""}> Standard</label>
+      <label class="opt" style="font-family:'Lexend',sans-serif"><input type="radio" name="font" data-set="font" value="dys" ${st.font==="dys"?"checked":""}> Easier to read (Lexend)</label>
+    </div></fieldset>
+    <fieldset><legend>Background colour</legend><div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px">
+      ${[["default","Default","var(--surface)"],["cream","Cream","#f7f0dc"],["blue","Pale blue","#e6eff8"],["dark","Dark","#1a2222"]].map(([v,l,c])=>`<label class="opt"><input type="radio" name="bg" data-set="bg" value="${v}" ${st.bg===v?"checked":""}><span style="width:20px;height:20px;border-radius:4px;border:1px solid var(--line);background:${c}"></span>${l}</label>`).join("")}
+    </div></fieldset>
+    <div class="grid2">
+      <label class="field">Text size<input type="range" min="0" max="3" step="1" value="${st.size}" data-set="size" id="set-size"><span class="hint">Small · Medium · Large · Extra large</span></label>
+      <label class="field">Line spacing<input type="range" min="0" max="2" step="1" value="${st.spacing}" data-set="spacing" id="set-sp"><span class="hint">Compact · Comfortable · Spacious</span></label>
+    </div>
+    <label class="check"><input type="checkbox" data-set="reduce" ${st.reduce?"checked":""}> Reduce motion and animations</label>
+    <div style="border:1px dashed var(--line);border-radius:8px;padding:16px" class="stack"><span class="muted">Preview</span><p style="font-size:1.06rem">Finds it hard to start written work when the room is noisy. Short breaks help.</p></div>
+  </section>
+  <section class="card"><h2>Account & sign-in</h2>
+    <ul class="list"><li><span>Email: alex.morgan@example.com</span><a href="#" data-act="toast" data-msg="Not part of the prototype yet">Change</a></li><li><span>Password</span><a href="#" data-act="toast" data-msg="Not part of the prototype yet">Change</a></li><li><span>Microsoft sign-in: connected</span><a href="#" data-act="toast" data-msg="Not part of the prototype yet">Disconnect</a></li></ul>
+  </section>
+  <section class="card"><h2>My data</h2><p class="muted">Download everything we hold, or delete your account and all passports.</p>
+    <div class="row"><button class="btn" data-act="toast" data-msg="In the real app this downloads your data">Download my data</button><button class="btn quiet" data-act="toast" data-msg="In the real app this asks you to confirm first">Delete account</button></div>
+  </section></main>`; };
+
+/* Wizard */
+V.step1 = p => `<main class="narrow">${stepper(p,1)}
+  <div class="stack"><h1>About your child</h1><p class="muted">Fill this in together with your child if you can.</p><span class="lock">${I.lock}Everything on this page stays private. It is never sent to the AI.</span></div>
+  <section class="card"><h2>Your child</h2><div class="grid2">
+    <label class="field">First name<input id="c-first" data-bind="child.first" value="${esc(p.child.first)}"></label>
+    <label class="field">Last name<input id="c-last" data-bind="child.last" value="${esc(p.child.last)}"></label>
+    <label class="field">Date of birth<input id="c-dob" type="date" data-bind="child.dob" value="${esc(p.child.dob)}"></label>
+    <label class="field">Name they like to be called <span class="hint">Optional</span><input id="c-pref" data-bind="child.pref" value="${esc(p.child.pref)}"></label>
+  </div></section>
+  <section class="card"><h2>School</h2><div class="grid2">
+    <label class="field">School<input id="s-name" data-bind="school.name" value="${esc(p.school.name)}" placeholder="Start typing the school name"></label>
+    <label class="field">Year / class<select id="s-year" data-bind="school.year">${["","Primary 1","Primary 2","Primary 3","Primary 4","Primary 5","Primary 6","Primary 7","S1","S2","S3","S4","S5","S6"].map(y=>`<option ${p.school.year===y?"selected":""} value="${y}">${y||"Choose…"}</option>`).join("")}</select></label>
+    <label class="field">Class or guidance teacher<input id="s-teacher" data-bind="school.teacher" value="${esc(p.school.teacher)}"></label>
+    <label class="field">Teacher's school email<input id="s-email" type="email" data-bind="school.email" value="${esc(p.school.email)}"><span class="hint">We send the passport here for them to review.</span></label>
+  </div></section>
+  <section class="card"><h2>Diagnoses <span class="hint">(optional)</span></h2>
+    <p class="muted">You don't need a diagnosis to use this. Suggestions are based on needs, not labels.</p>
+    ${["confirmed","suspected"].map(k=>`<fieldset><legend>${k==="confirmed"?"Confirmed diagnosis":"Suspected, or waiting for assessment"}</legend><div class="chips">${["ADHD","Autism","Dyslexia","Dyspraxia","Dyscalculia","Other"].map(d=>`<label class="chip-opt"><input type="checkbox" data-dx="${k}" value="${d}" ${p.dx[k].includes(d)?"checked":""}>${d}</label>`).join("")}</div></fieldset>`).join("")}
+  </section>
+  <section class="card"><h2>You</h2><div class="grid2">
+    <label class="field">Your name<input id="p-name" data-bind="parent.name" value="${esc(p.parent.name)}"></label>
+    <label class="field">Relationship to child<select id="p-rel" data-bind="parent.rel">${["Parent","Carer","Guardian"].map(r=>`<option ${p.parent.rel===r?"selected":""}>${r}</option>`).join("")}</select></label>
+  </div></section>
+  ${navRow(0,2,"Next: Needs")}</main>`;
+
+V.step2 = p => { const n=pickedNeeds(p).length; return `<main class="narrow">${stepper(p,2)}
+  <div class="stack"><h1>What does ${esc(name(p))} find hard?</h1><p class="lede">Tick anything that sounds familiar, and say whether it shows up at school, at home, or both. Some of these might surprise you. They're all common.</p><p class="muted">Draft list. The final tick boxes will come from ADHD Scotland.</p></div>
+  <div class="counter"><strong style="color:var(--ink)">${n} need${n===1?"":"s"} picked</strong><div class="meter" aria-hidden="true"><span style="width:${Math.min(100,n*10)}%"></span></div><span class="muted">${n<5?"Suggestions work best with 5–10.":n<=10?"That's a good number for suggestions.":"That's a lot. We'll focus on the first 10."}</span></div>
+  ${THEMES.map(t=>`<section class="card" aria-labelledby="th-${t.id}"><h2 id="th-${t.id}">${t.label}</h2>
+    <table class="needs"><thead><tr><th scope="col">Need</th><th scope="col">At school</th><th scope="col">At home</th></tr></thead><tbody>
+    ${NEEDS.filter(x=>x.theme===t.id).map(x=>{const v=p.needs[x.id]||{};return `<tr><td>${x.label}</td><td><input type="checkbox" data-need="${x.id}" data-where="school" ${v.school?"checked":""} aria-label="${esc(x.label)} at school"></td><td><input type="checkbox" data-need="${x.id}" data-where="home" ${v.home?"checked":""} aria-label="${esc(x.label)} at home"></td></tr>`;}).join("")}
+    </tbody></table></section>`).join("")}
+  ${navRow(1,3,"Next: In your own words")}</main>`; };
+
+V.step3 = p => `<main class="narrow">${stepper(p,3)}
+  <div class="stack"><h1>In your own words</h1><p class="lede">There are no right answers. Write it how you'd say it to a friend, and ask ${esc(name(p))} what they think too. Skip anything you like.</p><span class="lock">${I.lock}We remove names before your answers go to the AI.</span></div>
+  <section class="card" aria-label="Questions">
+    ${PROMPTS.map((q,i)=>`<div class="stack" style="gap:8px;${i?'border-top:1px solid var(--line-soft);padding-top:14px':''}">
+      <label class="field" style="font-size:1rem">${i+1}. ${q}<textarea id="q${i}" data-answer="${i}">${esc(p.answers[i])}</textarea></label>
+      ${i<4?`<div><button class="btn quiet" type="button" data-act="toast" data-msg="Voice input isn't decided yet. This shows where it would go.">${I.mic}Speak instead</button></div>`:""}
+    </div>`).join("")}
+  </section>
+  <section class="card" aria-labelledby="known-h"><h2 id="known-h">Adjustments that already work <span class="hint">(optional)</span></h2>
+    <p class="muted">Paste anything already agreed with a school, nursery or club, in any format. Or add things you know help. These are shown to the teacher alongside the suggestions.</p>
+    <label class="field">Paste an existing plan or notes<textarea id="pasted" data-bind="pasted">${esc(p.pasted)}</textarea></label>
+    <ul class="list">${p.known.map(k=>`<li><span>${esc(k.text)}</span><button class="linkbtn" style="color:var(--teal)" data-delknown="${k.id}">Remove</button></li>`).join("")}</ul>
+    <form class="row" data-form="known"><label class="sr" for="known-in">New adjustment</label><input id="known-in" class="ta" style="flex:1;min-width:200px;padding:10px 12px;border:1px solid var(--line);border-radius:5px;background:var(--surface)" placeholder="e.g. Ear defenders for assemblies"><button class="btn" type="submit">+ Add</button></form>
+  </section>
+  ${navRow(2,4, p.generated?"Next: Suggestions":"Get suggestions")}</main>`;
+
+V.step4 = p => {
+  const kept=p.suggestions.filter(s=>s.status==="kept").length, rej=p.suggestions.filter(s=>s.status==="rejected").length, pend=p.suggestions.filter(s=>s.status==="pending").length;
+  if(S.loading) return `<main class="narrow">${stepper(p,4)}<section class="ai" style="align-items:center;padding:48px 20px;text-align:center"><span class="ai-label">AI assistant</span><h2>Thinking about ${pickedNeeds(p).length} needs…</h2><span class="thinking" aria-label="Loading"><i></i><i></i><i></i></span><p class="muted">Only the needs and your answers are used. Names and contact details are removed.</p></section></main>`;
+  return `<main>${stepper(p,4)}
+  <div class="row between" style="align-items:flex-end"><div class="stack" style="max-width:680px"><h1>Suggested adjustments for ${esc(name(p))}</h1><p class="lede">Keep the ones that feel right, change or remove the rest. Nothing goes to the school until you say so.</p></div>
+    <p style="font-weight:700;color:var(--ink)">${kept} kept · ${rej} removed · ${pend} to decide</p></div>
+  <p class="disclaimer" role="note"><strong style="color:var(--ink)">These are suggestions, not medical or clinical advice.</strong> They are a starting point for your conversation with the school. You and the teacher decide what works. <a href="#" data-act="toast" data-msg="Thanks. In the real app this sends a report to ADHD Scotland.">Report a problem with a suggestion</a></p>
+  <div class="split">
+    <section class="main" aria-label="Suggestions">
+      ${p.suggestions.length?"":`<div class="card"><p>No needs picked yet. <a href="#" data-step="2">Go back and tick some needs</a> to get suggestions.</p></div>`}
+      ${p.suggestions.map(s=>suggCard(p,s)).join("")}
+      ${p.known.map(k=>`<article class="sugg kept"><div class="for"><span class="tag theme">Added by you</span></div><h3>${esc(k.text)}</h3><div class="acts"><button class="btn quiet" data-delknown="${k.id}">Remove</button></div></article>`).join("")}
+      <form class="card" data-form="own" style="gap:10px"><label class="field">Add your own adjustment<input id="own-in" placeholder="Something you know helps"></label><div><button class="btn" type="submit">+ Add</button></div></form>
+      <div class="row"><button class="btn" data-act="regen" ${rej||pend?"":"disabled"}>${I.redo}Regenerate the ones I haven't kept</button></div>
+    </section>
+    <aside class="side ai" aria-labelledby="talk-h">
+      <span class="ai-label">AI assistant</span><h2 id="talk-h">Talk it through</h2>
+      <div class="thread" aria-live="polite" id="thread">
+        ${p.chat.map(m=>`<p class="msg ${m.who}">${esc(m.text)}</p>`).join("")}
+        ${S.chatThinking?`<p class="msg bot"><span class="thinking" aria-label="Thinking"><i></i><i></i><i></i></span></p>`:""}
+      </div>
+      <form class="stack" data-form="chat" style="gap:8px"><label for="chat-in" class="field">Tell us more, or ask a question</label><textarea id="chat-in" class="ta" style="min-height:70px" placeholder="e.g. He hates being singled out in front of the class"></textarea>
+        <div class="row" style="gap:8px"><button class="btn primary" type="submit">Send</button><button class="btn quiet" type="button" aria-label="Speak instead" data-act="toast" data-msg="Voice input isn't decided yet.">${I.mic}</button></div></form>
+      <p class="muted">The assistant only sees needs and your answers, never names or contact details.</p>
+    </aside>
+  </div>
+  ${navRow(3,5,"Next: Review & send")}</main>`;
+};
+function suggCard(p,s){
+  const v=p.needs[s.needId]||{};
+  if(s.status==="rejected") return `<article class="sugg rejected"><div class="for"><span class="tag theme">${themeLabel(s.theme)}</span>For: ${esc(needLabel(s.needId).toLowerCase())}</div><h3>${esc(s.title)}</h3>
+    <label class="field">What's not right about this one? <span class="hint">Helps us improve</span><textarea id="fb-${s.id}" data-fb="${s.id}" style="min-height:60px">${esc(s.feedback)}</textarea></label>
+    <div class="acts"><button class="btn" data-alt="${s.id}">${I.redo}Suggest something else</button><button class="btn quiet" data-undo="${s.id}">Undo</button></div></article>`;
+  return `<article class="sugg ${s.status==="kept"?"kept":""}"><div class="for"><span class="tag theme">${themeLabel(s.theme)}</span>For: ${esc(needLabel(s.needId).toLowerCase())} · ${where(v)}</div>
+    ${s.editing?`<label class="field">Adjustment<input id="ed-${s.id}" data-edit="${s.id}" value="${esc(s.title)}"></label><div><button class="btn" data-doneedit="${s.id}">Done</button></div>`:`<h3>${esc(s.title)}</h3>`}
+    <p class="why"><strong style="color:var(--ink)">Why this helps:</strong> ${esc(s.why)}${s.changed?' <em>(Changed after your message.)</em>':''}</p>
+    ${s.noteOpen||s.note?`<label class="field">Note for the teacher<textarea id="nt-${s.id}" data-note="${s.id}" style="min-height:56px">${esc(s.note)}</textarea></label>`:""}
+    <div class="acts">
+      <button class="btn ${s.status==="kept"?"on":"primary"}" data-keep="${s.id}" aria-pressed="${s.status==="kept"}">${I.up}${s.status==="kept"?"Kept":"Keep"}</button>
+      <button class="btn quiet" data-reject="${s.id}">${I.down}Not right</button>
+      <button class="btn quiet" data-editopen="${s.id}">Edit</button>
+      ${s.noteOpen||s.note?"":`<button class="btn quiet" data-noteopen="${s.id}">Add a note</button>`}
+    </div></article>`;
+}
+
+V.step5 = p => { const kept=p.suggestions.filter(s=>s.status==="kept"); return `<main>${stepper(p,5)}
+  <div class="stack"><h1>Check and send to school</h1><p class="lede">The teacher will look at each adjustment, say whether it works in their school, and add comments. Then you both sign it off.</p></div>
+  <div class="split">
+    <section class="main card"><div class="row between"><h2>${esc(p.child.first||"Your child")}'s passport</h2><a href="#" data-step="4">Edit</a></div>
+      <p class="muted">${esc([p.school.year,p.school.name,p.school.teacher].filter(Boolean).join(" · ")||"Add school details in step 1")}</p>
+      <h3>Needs (${pickedNeeds(p).length})</h3><ul style="margin:0;padding-left:20px;display:flex;flex-direction:column;gap:6px">${pickedNeeds(p).map(id=>`<li>${needLabel(id)} (${where(p.needs[id])})</li>`).join("")||"<li>None picked yet</li>"}</ul>
+      <h3>Adjustments to discuss (${kept.length+p.known.length})</h3><ul style="margin:0;padding-left:20px;display:flex;flex-direction:column;gap:6px">${kept.map(s=>`<li>${esc(s.title)}</li>`).join("")}${p.known.map(k=>`<li>${esc(k.text)} <span class="muted">(added by you)</span></li>`).join("")||(kept.length?"":"<li>None kept yet</li>")}</ul>
+    </section>
+    <div class="side">
+      <section class="card"><h2>What the teacher can see</h2><p class="muted">Always shared: first name, class, needs, adjustments and why they help.</p>
+        <label class="check"><input type="checkbox" data-share="dx" ${p.share.dx?"checked":""}><span>Diagnoses (confirmed and suspected)</span></label>
+        <label class="check"><input type="checkbox" data-share="answers" ${p.share.answers?"checked":""}><span>My answers from "In your own words"</span></label>
+        <p class="muted">Never shared: your email, phone or ${esc(name(p))}'s date of birth.</p></section>
+      <form class="card" data-form="send"><h2>Send to</h2>
+        <label class="field">Teacher's school email<input id="snd-email" type="email" data-bind="school.email" value="${esc(p.school.email)}" required></label>
+        <label class="field">Review this in<select id="snd-rev" data-bind="send.review">${["3 months","6 months","End of school year"].map(r=>`<option ${p.send.review===r?"selected":""}>${r}</option>`).join("")}</select></label>
+        <label class="field">Message to the teacher <span class="hint">Optional</span><textarea id="snd-msg" data-bind="send.msg" style="min-height:80px">${esc(p.send.msg)}</textarea></label>
+        <label class="check"><input type="checkbox" data-bind-check="send.withChild" ${p.send.withChild?"checked":""}><span>I've gone through this with ${esc(name(p))}</span></label>
+        <button class="btn primary" type="submit" ${kept.length+p.known.length?"":"disabled"}>Send to school</button>
+        ${kept.length+p.known.length?"":`<p class="hint">Keep at least one adjustment first.</p>`}
+      </form>
+    </div>
+  </div>
+  <div class="row"><button class="btn quiet" data-step="4">Back</button></div></main>`; };
+
+V.passport = p => {
+  const t=p.signoff.teacher;
+  const ag=p.suggestions.filter(s=>s.status==="kept" && s.teacher.decision!=="no");
+  const no=p.suggestions.filter(s=>s.status==="kept" && s.teacher.decision==="no");
+  const dec = s => ({yes:"Agreed",changes:"Agreed with changes",no:"Not possible here","":"Waiting for teacher"}[s.teacher.decision]);
+  return `<main>
+  <div class="row between" style="align-items:flex-end"><div class="stack" style="gap:8px"><a href="#" data-go="home">← My passports</a><h1>${esc(p.child.first)}'s accessibility passport</h1><p class="muted">${esc([p.school.year,p.school.name].filter(Boolean).join(" · "))}</p></div>
+    <div class="row"><button class="btn quiet" data-act="toast" data-msg="In the real app this downloads a PDF">Download PDF</button>${p.status==="agreed"?`<button class="btn" data-review="${p.id}">Update or review</button>`:""}</div></div>
+  ${p.status==="with_teacher"?`<section class="banner"><div class="stack" style="gap:4px"><strong style="color:var(--ink)">Waiting for ${esc(p.school.teacher||"the teacher")} to review</strong><span class="muted">Sent to ${esc(p.school.email)}. Switch to the teacher view at the top to see what they get.</span></div><button class="btn" data-act="role" data-v="teacher">See the teacher side</button></section>`:""}
+  ${p.status==="teacher_signed"?`<section class="banner sign"><div class="stack" style="gap:4px"><strong>${esc(t.name)} has signed. Please check their comments and sign.</strong><span>Once you sign, the passport is agreed and you'll get a reminder to review it.</span></div><button class="btn primary" data-act="parentsign">Sign as ${esc(p.parent.name)}</button></section>`:""}
+  ${p.status==="agreed"?`<section class="banner" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr))"><div class="stack" style="gap:6px"><span class="tag agreed" style="align-self:flex-start">Agreed</span><span class="muted">Both people have signed</span></div><div class="stack" style="gap:2px"><strong style="color:var(--ink)">${esc(t.name)}</strong><span class="muted">${esc(t.role)} · signed ${esc(t.date)}</span></div><div class="stack" style="gap:2px"><strong style="color:var(--ink)">${esc(p.parent.name)}</strong><span class="muted">${esc(p.parent.rel)} · signed ${esc(p.signoff.parent.date)}</span></div><div class="stack" style="gap:2px"><strong style="color:var(--ink)">Review by ${fmtDate(t.review)}</strong><a href="#" data-act="toast" data-msg="In the real app this adds a calendar event">Add to calendar</a></div></section>`:""}
+  <div class="split">
+    <div class="main">
+      <section class="card"><h2>${p.status==="with_teacher"?"Adjustments sent":"Agreed adjustments"} (${ag.length+p.known.length})</h2>
+        <ul class="list">${ag.map(s=>`<li style="flex-direction:column;align-items:flex-start"><h3>${esc(s.title)}</h3><span class="muted">For: ${esc(needLabel(s.needId).toLowerCase())} · ${dec(s)}</span>${s.teacher.comment?`<span>Teacher's note: "${esc(s.teacher.comment)}"</span>`:""}</li>`).join("")}${p.known.map(k=>`<li style="flex-direction:column;align-items:flex-start"><h3>${esc(k.text)}</h3><span class="muted">Added by parent</span></li>`).join("")}</ul></section>
+      ${no.length?`<section class="card"><h2>Not possible right now (${no.length})</h2><ul class="list">${no.map(s=>`<li style="flex-direction:column;align-items:flex-start"><h3>${esc(s.title)}</h3><span>Teacher's note: "${esc(s.teacher.comment)}"</span></li>`).join("")}</ul></section>`:""}
+      ${p.status==="agreed"?`<section class="card"><h2 style="font-size:1.05rem">Were the suggestions helpful?</h2><div class="row"><button class="btn quiet" data-act="toast" data-msg="Thanks for the feedback">Yes</button><button class="btn quiet" data-act="toast" data-msg="Thanks for the feedback">Partly</button><button class="btn quiet" data-act="toast" data-msg="Thanks for the feedback">No</button></div></section>`:""}
+    </div>
+    <aside class="side card"><h2 style="font-size:1.1rem">History</h2><ol class="tl">${p.history.map(h=>`<li><span class="dot"></span><span>${esc(h.text)}<br><span class="muted">${esc(h.t)}</span></span></li>`).join("")}</ol>
+      <p class="muted">Who can see this: you${p.status!=="draft"?", "+esc(p.school.teacher):""}.</p></aside>
+  </div></main>`;
+};
+
+V["review-due"] = p => `<main class="narrow">
+  <div class="stack"><a href="#" data-open="${p.id}">← ${esc(p.child.first)}'s passport</a><h1>Time to check in on ${esc(p.child.first)}'s passport</h1><p class="lede">Needs change as children grow. What's changed since you and ${esc(p.signoff.teacher?p.signoff.teacher.name:"the teacher")} agreed it?</p></div>
+  <fieldset class="stack"><legend class="muted" style="font-weight:400">Choose one</legend>
+    ${[["keep","Things are working, keep it as it is","We'll ask the teacher to confirm and set a new review date."],["changed","Some things have changed","Update needs and answers, then get fresh suggestions. Kept adjustments stay."],["teacher","New teacher or new class","Hand the passport over and set up a conversation with the new teacher."],["school","Moving school","For example primary to secondary. You choose who at the new school sees it."]].map(([v,t,d])=>`<label class="choice"><input type="radio" name="rv" data-rv="${v}" ${S.review.choice===v?"checked":""}><span><strong style="display:block;color:var(--ink)">${t}</strong><span class="muted">${d}</span></span></label>`).join("")}
+  </fieldset>
+  ${S.review.choice==="teacher"||S.review.choice==="school"?`<form class="card" data-form="handover"><h2>Hand over to the new ${S.review.choice==="school"?"school":"teacher"}</h2><div class="grid2">
+      ${S.review.choice==="school"?`<label class="field">New school<input id="ho-school" placeholder="School name"></label>`:`<label class="field">New class<input id="ho-class" value="Primary 6"></label>`}
+      <label class="field">New teacher's name<input id="ho-name" required></label><label class="field">New teacher's school email<input id="ho-email" type="email" required></label></div>
+    <label class="check"><input type="checkbox" checked><span>Ask them to meet and review it with us. Agreed adjustments carry over until then.</span></label>
+    <label class="check"><input type="checkbox"><span>Remove the previous teacher's access</span></label>
+    <div class="row"><button class="btn primary" type="submit">Send to new teacher</button><button class="btn quiet" type="button" data-go="home">Remind me later</button></div></form>`:
+  S.review.choice==="changed"?`<div class="row"><button class="btn primary" data-act="reopen">Update needs and answers</button></div>`:
+  `<div class="row"><button class="btn primary" data-act="keepasis">Ask teacher to confirm</button></div>`}
+  </main>`;
+
+/* ---------- Teacher screens ---------- */
+const TP = () => S.passports.find(p=>p.id===S.teacherPid) || S.passports.find(p=>p.status==="with_teacher") || S.passports[0];
+V["t-email"] = () => { const p=TP(); return `<main>
+  <div class="stack"><h1>What the teacher receives</h1><p class="muted">Teachers don't need an account. They get this email and confirm with a code. (Whether teachers get full logins is still an open question.)</p></div>
+  <div class="split"><section class="main email" aria-label="Email">
+    <div class="meta"><span><strong>From:</strong> School Accessibility Passport &lt;no-reply@passport.example&gt;</span><span><strong>To:</strong> ${esc(p.school.email)}</span><span><strong>Subject:</strong> ${esc(p.parent.name)} has shared ${esc(p.child.first)}'s accessibility passport</span></div>
+    <div class="body"><span class="chip" style="background:#fff;border-radius:8px;padding:4px 6px;align-self:flex-start;display:flex"><img src="${LOGO}" alt="ADHD Scotland" style="height:48px"></span>
+      <h2>${esc(p.parent.name)} would like to agree some adjustments for ${esc(p.child.first)} (${esc(p.school.year)})</h2>
+      <p>They've listed ${pickedNeeds(p).length} needs and ${p.suggestions.filter(s=>s.status==="kept").length+p.known.length} possible adjustments. Please look at each one, say whether it works in your school, and add any comments. It takes about 10 minutes.</p>
+      ${p.send.msg?`<p class="why"><strong style="color:var(--ink)">Message from ${esc(p.parent.name)}:</strong> "${esc(p.send.msg)}"</p>`:""}
+      <div><button class="btn primary" data-go="t-code">Review ${esc(p.child.first)}'s passport</button></div>
+      <p class="muted">For privacy, the passport isn't in this email. The link works for 14 days, and we'll email you a code to confirm it's you.</p></div>
+  </section>
+  <aside class="side card"><h2 style="font-size:1.05rem">Try another pupil</h2><p class="muted">Pick which example passport this email is about.</p>
+    ${S.passports.filter(x=>x.status!=="draft").map(x=>`<button class="btn ${x.id===p.id?"on":"quiet"}" data-tpick="${x.id}">${esc(x.child.first)} · ${statusTag(x)}</button>`).join("")}</aside></div></main>`; };
+V["t-code"] = () => { const p=TP(); return `<main class="narrow" style="max-width:520px"><form class="card" data-form="code">
+  <h1 style="font-size:1.5rem">Confirm it's you</h1><p>We've sent a 6-digit code to ${esc(p.school.email.replace(/^(.).*(@.*)$/,"$1•••$2"))}.</p>
+  <p class="hint">Prototype: type any 6 digits.</p>
+  <fieldset><legend class="muted" style="font-weight:400">Enter code</legend><div class="row" style="gap:8px">${[0,1,2,3,4,5].map(i=>`<input class="code" id="code${i}" inputmode="numeric" maxlength="1" aria-label="Digit ${i+1}" data-code="${i}">`).join("")}</div></fieldset>
+  <label class="check"><input type="checkbox"> Remember this device for 30 days</label>
+  <button class="btn primary" type="submit">Continue</button><a href="#" data-act="toast" data-msg="New code sent (not really, it's a prototype)">Send a new code</a></form></main>`; };
+V["t-home"] = () => { const list=S.passports.filter(p=>p.status!=="draft"); const c=k=>list.filter(p=>p.status===k).length; return `<main>
+  <div class="stack"><h1>Passports shared with you</h1><p class="muted">Only pupils whose parents have shared a passport with you appear here. (Shown in case full teacher logins are chosen.)</p></div>
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:16px"><div class="stat"><span class="muted">Waiting for you</span><strong>${c("with_teacher")}</strong></div><div class="stat"><span class="muted">Waiting for parent</span><strong>${c("teacher_signed")}</strong></div><div class="stat"><span class="muted">Agreed</span><strong>${c("agreed")}</strong></div></div>
+  <section class="card"><h2>Pupils</h2><div class="tablewrap"><table class="pupils"><thead><tr><th scope="col">Pupil</th><th scope="col">Class</th><th scope="col">Status</th><th scope="col">Last update</th><th scope="col"><span class="sr">Action</span></th></tr></thead><tbody>
+  ${list.map(p=>`<tr><td>${esc(p.child.first)}</td><td>${esc(p.school.year)}</td><td>${statusTag(p).replace("Ready for your signature","Waiting for parent").replace("With teacher","Waiting for you")}</td><td class="muted">${esc(p.history[0].t)}</td><td><button class="btn ${p.status==="with_teacher"?"primary":"quiet"}" data-topen="${p.id}">${p.status==="with_teacher"?"Review":"Open"}</button></td></tr>`).join("")}
+  </tbody></table></div></section></main>`; };
+V["t-review"] = () => { const p=TP(); const items=p.suggestions.filter(s=>s.status==="kept"); const locked=p.status!=="with_teacher"; return `<main>
+  <div class="stack"><h1>${esc(p.child.first)} · ${esc(p.school.year)}</h1><p class="muted">Shared by ${esc(p.parent.name)} · ${esc(p.school.name)}</p>
+  <p class="lede">${locked?"You've already signed this passport. This is a read-only view.":"For each adjustment, say whether it can work in your school. Comments go to the parent. Nothing is final until you both sign off."}</p></div>
+  <div class="split">
+    <aside class="side card"><h2 style="font-size:1.1rem">About ${esc(p.child.first)}</h2>
+      ${p.share.dx&&(p.dx.confirmed.length||p.dx.suspected.length)?`<p class="muted">Diagnosis (shared by parent): ${esc([...p.dx.confirmed,...p.dx.suspected.map(d=>d+" (suspected)")].join(", "))}</p>`:`<p class="muted">The parent hasn't shared diagnoses.</p>`}
+      <h3>What ${esc(p.child.first)} finds hard</h3><ul style="margin:0;padding-left:20px;display:flex;flex-direction:column;gap:6px">${pickedNeeds(p).map(id=>`<li>${needLabel(id)} (${where(p.needs[id])})</li>`).join("")}</ul>
+      ${p.share.answers&&p.answers[3]?`<h3>What ${esc(p.child.first)} wants you to know</h3><p style="font-style:italic">${esc(p.answers[3])}</p>`:""}
+      ${p.known.length?`<h3>Already works</h3><ul style="margin:0;padding-left:20px">${p.known.map(k=>`<li>${esc(k.text)}</li>`).join("")}</ul>`:""}
+    </aside>
+    <section class="main" aria-label="Adjustments">
+      ${items.map(s=>`<article class="sugg"><div class="for"><span class="tag theme">${themeLabel(s.theme)}</span>For: ${esc(needLabel(s.needId).toLowerCase())}</div><h3>${esc(s.title)}</h3>
+        <p class="why"><strong style="color:var(--ink)">Why this helps:</strong> ${esc(s.why)}</p>
+        ${s.note?`<p><strong style="color:var(--ink)">Parent's note:</strong> ${esc(s.note)}</p>`:""}
+        <fieldset ${locked?"disabled":""}><legend class="muted" style="font-weight:400;margin-bottom:8px">Can this work in your school?</legend><div class="row" style="gap:8px">
+          ${[["yes","Yes"],["changes","Yes, with changes"],["no","Not possible here"]].map(([v,l])=>`<label class="opt"><input type="radio" name="d-${s.id}" data-dec="${s.id}" value="${v}" ${s.teacher.decision===v?"checked":""}>${l}</label>`).join("")}</div></fieldset>
+        ${s.teacher.decision&&s.teacher.decision!=="yes"||s.teacher.comment?`<label class="field">${s.teacher.decision==="no"?"Tell the parent why (required)":"Comment for the parent"}<textarea id="tc-${s.id}" data-tcom="${s.id}" style="min-height:60px" ${locked?"disabled":""}>${esc(s.teacher.comment)}</textarea></label>`:""}
+        ${s.teacher.decision==="no"&&!locked?`<div><button class="btn quiet" data-talt="${s.id}">${I.redo}Suggest an alternative that works here</button></div>`:""}
+      </article>`).join("")}
+      ${p.known.map(k=>`<article class="sugg"><div class="for"><span class="tag theme">Added by parent</span></div><h3>${esc(k.text)}</h3></article>`).join("")}
+    </section>
+  </div>
+  ${locked?`<div class="row"><button class="btn" data-go="t-home">Back to my pupils</button></div>`:`<form class="card hl" data-form="tsign"><h2>Sign off</h2>
+    <p>Once you sign, ${esc(p.parent.name)} will be asked to sign too. You'll both get a copy, and it passes to the next teacher if ${esc(p.child.first)} changes class.</p>
+    <div class="grid2"><label class="field">Your full name<input id="ts-name" required value="${esc((p.school.teacher||"").replace(/\s*\(.*\)/,""))}"></label>
+      <label class="field">Your role<select id="ts-role"><option>Class teacher</option><option>Support for learning / ASN teacher</option><option>Guidance / pupil support</option><option>Head teacher</option></select></label>
+      <label class="field">Review date<input id="ts-review" type="date" required value="${new Date(Date.now()+90*864e5).toISOString().slice(0,10)}"></label></div>
+    <p class="hint" id="ts-err" hidden></p>
+    <div class="row"><button class="btn primary" type="submit">Sign off and send to parent</button><button class="btn quiet" type="button" data-act="toast" data-msg="Comments saved">Save comments, sign later</button></div></form>`}
+  </main>`; };
+V["t-done"] = () => { const p=TP(); return `<main class="narrow"><section class="card hl" style="align-items:flex-start"><span class="tag agreed">Signed</span><h1>Thanks. ${esc(p.parent.name)} has been asked to sign.</h1><p>You'll get an email when it's fully agreed. A reminder will go to you both before ${fmtDate(p.signoff.teacher.review)}.</p><div class="row"><button class="btn primary" data-act="role" data-v="parent">See the parent side</button><button class="btn" data-go="t-home">Back to my pupils</button></div></section></main>`; };
+
+V.sent = p => `<main class="narrow"><section class="card hl" style="align-items:flex-start"><span class="tag teacher">Sent</span><h1>${esc(p.child.first||"Your child")}'s passport is on its way to ${esc(p.school.teacher||"the teacher")}</h1>
+  <p>We've emailed ${esc(p.school.email)}. You'll hear when they've reviewed it. It usually helps to mention it to them in person too.</p>
+  <div class="row"><button class="btn primary" data-act="role" data-v="teacher">See what the teacher gets</button><button class="btn" data-go="home">Back to my passports</button></div></section></main>`;
+
+/* ---------- Render ---------- */
+function applySettings(){
+  const st=S.settings, app=document.getElementById("app");
+  app.className = "app" + (st.font==="dys"?" font-dys":"") + (st.bg!=="default"?" bg-"+st.bg:"") + (st.reduce?" reduce":"");
+  document.documentElement.style.fontSize = [93.75,100,112.5,125][st.size]+"%";
+  app.style.setProperty("--lh",[1.4,1.55,1.8][st.spacing]);
+  document.body.style.background = getComputedStyle(app).getPropertyValue("--bg");
+}
+function render(focusSel){
+  const r=S.route; let inner;
+  if(S.role==="teacher"){
+    if(!S.teacherVerified && !["t-email","t-code"].includes(r)) S.route="t-email";
+    inner = V[S.route] ? V[S.route]() : V["t-email"]();
+  } else {
+    if(!S.signedIn && !["signin","register"].includes(r)) S.route="signin";
+    const p=P(), cur=S.route;
+    if(cur.startsWith("step")||["passport","review-due","sent"].includes(cur)){ inner = p ? V[cur](p) : V.home(); }
+    else inner = (V[S.route]||V.home)();
+  }
+  document.getElementById("app").innerHTML = shell(inner);
+  applySettings(); save();
+  const th=document.getElementById("thread"); if(th) th.scrollTop=th.scrollHeight;
+  if(focusSel){ const el=document.querySelector(focusSel); if(el) el.focus(); }
+}
+function go(route){ S.route=route; render(); window.scrollTo(0,0); }
+let toastT;
+function toast(msg){ const t=document.getElementById("toast"); t.textContent=msg; t.hidden=false; clearTimeout(toastT); toastT=setTimeout(()=>t.hidden=true,2600); }
+function setPath(obj,path,val){ const k=path.split("."); let o=obj; while(k.length>1) o=o[k.shift()]; o[k[0]]=val; }
+
+/* Mock AI */
+function generate(p){
+  const ids=pickedNeeds(p).slice(0,10);
+  S.loading=true; render();
+  setTimeout(()=>{
+    p.suggestions = ids.map(id=>makeSugg(id,0));
+    p.generated=true;
+    p.chat=[{who:"bot",text:`I've suggested ${ids.length} adjustment${ids.length===1?"":"s"} from the needs you picked. Is there anything here that wouldn't suit ${name(p)}? Tell me and I'll adjust.`}];
+    p.history.unshift({t:today(),text:"Got AI suggestions"});
+    S.loading=false; render();
+  },1400);
+}
+function nextAlt(p,s){
+  const used=p.suggestions.filter(x=>x.needId===s.needId).map(x=>x.alt);
+  const opts=LIB[s.needId].map((_,i)=>i).filter(i=>!used.includes(i));
+  const alt = opts.length?opts[0]:(s.alt+1)%LIB[s.needId].length;
+  const n=makeSugg(s.needId,alt); return n;
+}
+function chatReply(p,text){
+  const t=text.toLowerCase(); let reply;
+  const f=p.suggestions.find(s=>s.needId==="focus"&&s.status!=="rejected");
+  if(/single|in front|embarrass|attention to|stand out/.test(t)){
+    if(f && f.alt!==0){ const i=p.suggestions.indexOf(f); const n=makeSugg("focus",0); n.status=f.status; n.changed=true; p.suggestions[i]=n; }
+    else if(f){ f.changed=true; }
+    reply="Thanks, that's really useful. I've made sure the ideas don't single them out. For example, movement breaks can be asked for with a quiet signal card instead of out loud.";
+  } else if(/assistant|staff|resource|budget|can't|cannot|won't/.test(t)){
+    reply="Good to know. Mark that one as 'Not right' and I'll suggest something that doesn't need extra staff. The teacher can also suggest alternatives when they review it.";
+  } else if(/home|evening|bedtime|homework/.test(t)){
+    reply="Home matters too. Adjustments like lighter homework on hard days or an end-of-day check-in can ease evenings. Want me to add one? Tick 'Holds it together at school, then falls apart at home' in step 2 and I'll include it.";
+  } else if(/medic|medication|supplement|diet/.test(t)){
+    reply="I can't give medical advice, including about medication or supplements. Your GP or the NHS can help with that. I can help with adjustments at school.";
+  } else {
+    reply="Thanks, I've noted that. If any suggestion doesn't fit, mark it 'Not right' and tell me why, and I'll find another.";
+  }
+  return reply;
+}
+
+/* ---------- Events ---------- */
+const app=document.getElementById("app");
+app.addEventListener("click",e=>{
+  const b=e.target.closest("button,a"); if(!b) return;
+  const d=b.dataset; const p=P();
+  if(b.tagName==="A" && (b.getAttribute("href")||"").startsWith("#")) e.preventDefault();
+  if(d.go){ go(d.go); return; }
+  if(d.step){ const n=+d.step; if(!p) return;
+    if(n===4 && !p.generated){ p.step=Math.max(p.step,4); S.route="step4"; generate(p); return; }
+    p.step=Math.max(p.step,n); go("step"+n); return; }
+  if(d.continue){ S.current=d.continue; go("step"+S.passports.find(x=>x.id===d.continue).step); return; }
+  if(d.open){ S.current=d.open; go("passport"); return; }
+  if(d.review){ S.current=d.review; S.review.choice="teacher"; go("review-due"); return; }
+  if(d.keep){ const s=p.suggestions.find(x=>x.id===d.keep); s.status=s.status==="kept"?"pending":"kept"; render(); return; }
+  if(d.reject){ const s=p.suggestions.find(x=>x.id===d.reject); s.status="rejected"; render(`#fb-${s.id}`); return; }
+  if(d.undo){ p.suggestions.find(x=>x.id===d.undo).status="pending"; render(); return; }
+  if(d.alt){ const i=p.suggestions.findIndex(x=>x.id===d.alt); p.suggestions[i]=nextAlt(p,p.suggestions[i]); toast("New suggestion added"); render(); return; }
+  if(d.editopen){ p.suggestions.find(x=>x.id===d.editopen).editing=true; render(`#ed-${d.editopen}`); return; }
+  if(d.doneedit){ p.suggestions.find(x=>x.id===d.doneedit).editing=false; render(); return; }
+  if(d.noteopen){ p.suggestions.find(x=>x.id===d.noteopen).noteOpen=true; render(`#nt-${d.noteopen}`); return; }
+  if(d.delknown){ p.known=p.known.filter(k=>k.id!==d.delknown); render(); return; }
+  if(d.tpick){ S.teacherPid=d.tpick; render(); return; }
+  if(d.topen){ S.teacherPid=d.topen; go("t-review"); return; }
+  if(d.talt){ const tp=TP(); const i=tp.suggestions.findIndex(x=>x.id===d.talt); const n=nextAlt(tp,tp.suggestions[i]); n.status="kept"; n.teacher={decision:"yes",comment:"Suggested by the teacher instead of: "+tp.suggestions[i].title}; tp.suggestions[i]=n; toast("Alternative added for the parent to see"); render(); return; }
+  const a=d.act; if(!a) return;
+  if(a==="role"){ S.role=d.v; if(d.v==="teacher"){ S.route=S.teacherVerified?"t-home":"t-email"; } else { S.route=S.signedIn?"home":"signin"; } render(); window.scrollTo(0,0); }
+  else if(a==="reset"){ try{localStorage.removeItem(KEY);}catch(_){} S=seed(); render(); toast("Demo reset"); }
+  else if(a==="signin"){ S.signedIn=true; go("home"); }
+  else if(a==="signout"){ S.signedIn=false; go("signin"); }
+  else if(a==="t-signout"){ S.teacherVerified=false; go("t-email"); }
+  else if(a==="new"){ const n=blankPassport(); S.passports.push(n); S.current=n.id; go("step1"); }
+  else if(a==="toast"){ toast(d.msg); }
+  else if(a==="nudge"){ toast("Reminder sent to the teacher"); }
+  else if(a==="regen"){ p.suggestions=p.suggestions.map(s=>s.status==="kept"?s:nextAlt(p,s)); toast("New ideas for the ones you haven't kept"); render(); }
+  else if(a==="parentsign"){ p.signoff.parent={date:today()}; p.status="agreed"; p.history.unshift({t:today(),text:"Signed by "+p.parent.name}); toast("Passport agreed"); render(); }
+  else if(a==="reopen"){ p.status="draft"; p.step=2; p.generated=true; p.history.unshift({t:today(),text:"Review started"}); go("step2"); }
+  else if(a==="keepasis"){ p.status="with_teacher"; p.history.unshift({t:today(),text:"Asked teacher to confirm, no changes"}); toast("Sent to the teacher to confirm"); go("home"); }
+});
+app.addEventListener("input",e=>{
+  const el=e.target, d=el.dataset, p=P();
+  if(d.bind && p){ setPath(p,d.bind,el.value); save(); }
+  else if(d.answer && p){ p.answers[+d.answer]=el.value; save(); }
+  else if(d.fb){ p.suggestions.find(x=>x.id===d.fb).feedback=el.value; save(); }
+  else if(d.note){ p.suggestions.find(x=>x.id===d.note).note=el.value; save(); }
+  else if(d.edit){ p.suggestions.find(x=>x.id===d.edit).title=el.value; save(); }
+  else if(d.tcom){ TP().suggestions.find(x=>x.id===d.tcom).teacher.comment=el.value; save(); }
+  else if(d.code){ el.value=el.value.replace(/\D/g,""); if(el.value){ const nx=document.getElementById("code"+(+d.code+1)); if(nx) nx.focus(); } }
+  else if(d.set==="size"||d.set==="spacing"){ S.settings[d.set]=+el.value; applySettings(); save(); }
+});
+app.addEventListener("change",e=>{
+  const el=e.target, d=el.dataset, p=P();
+  if(d.need){ const v=p.needs[d.need]||(p.needs[d.need]={school:false,home:false}); v[d.where]=el.checked; if(p.generated && el.checked && !p.suggestions.some(s=>s.needId===d.need)) p.suggestions.push(makeSugg(d.need,0)); render(`[data-need="${d.need}"][data-where="${d.where}"]`); }
+  else if(d.dx){ const arr=p.dx[d.dx]; if(el.checked) arr.push(el.value); else arr.splice(arr.indexOf(el.value),1); save(); }
+  else if(d.share){ p.share[d.share]=el.checked; save(); }
+  else if(d.bindCheck){ setPath(p,d.bindCheck,el.checked); save(); }
+  else if(d.dec){ const s=TP().suggestions.find(x=>x.id===d.dec); s.teacher.decision=el.value; render(el.value==="yes"?null:`#tc-${s.id}`); }
+  else if(d.rv){ S.review.choice=d.rv; render(); }
+  else if(d.set==="font"||d.set==="bg"){ S.settings[d.set]=el.value; applySettings(); save(); }
+  else if(d.set==="reduce"){ S.settings.reduce=el.checked; applySettings(); save(); }
+  else if(d.bind && p && el.tagName==="SELECT"){ setPath(p,d.bind,el.value); save(); }
+});
+app.addEventListener("submit",e=>{
+  e.preventDefault(); const f=e.target.dataset.form; const p=P();
+  if(f==="signin"||f==="register"){ S.signedIn=true; if(f==="register"){ const fn=document.getElementById("rg-first").value, ln=document.getElementById("rg-last").value; S.passports.forEach(x=>x.parent.name=(fn+" "+ln).trim()||x.parent.name); } go("home"); }
+  else if(f==="known"||f==="own"){ const inp=document.getElementById(f==="known"?"known-in":"own-in"); const v=inp.value.trim(); if(!v) return; p.known.push({id:nid(),text:v}); render(f==="known"?"#known-in":"#own-in"); }
+  else if(f==="chat"){ const inp=document.getElementById("chat-in"); const v=inp.value.trim(); if(!v) return; p.chat.push({who:"me",text:v}); S.chatThinking=true; render("#chat-in");
+    setTimeout(()=>{ p.chat.push({who:"bot",text:chatReply(p,v)}); S.chatThinking=false; render("#chat-in"); },1100); }
+  else if(f==="send"){ if(!p.school.email){ toast("Add the teacher's email first"); return; } p.status="with_teacher"; p.history.unshift({t:today(),text:"Sent to "+(p.school.name||"school")}); S.teacherPid=p.id; S.teacherVerified=false; go("sent"); }
+  else if(f==="code"){ const code=[0,1,2,3,4,5].map(i=>document.getElementById("code"+i).value).join(""); if(code.length<6){ toast("Enter all 6 digits"); return; } S.teacherVerified=true; go(TP().status==="with_teacher"?"t-review":"t-home"); }
+  else if(f==="tsign"){ const tp=TP(); const items=tp.suggestions.filter(s=>s.status==="kept");
+    const undecided=items.filter(s=>!s.teacher.decision).length, noWhy=items.filter(s=>s.teacher.decision==="no"&&!s.teacher.comment.trim()).length;
+    const err=document.getElementById("ts-err");
+    if(undecided||noWhy){ err.hidden=false; err.style.color="var(--bad)"; err.textContent= undecided?`Decide on ${undecided} more adjustment${undecided>1?"s":""} first.`:"Add a reason for each adjustment that isn't possible."; return; }
+    const nm=document.getElementById("ts-name").value.trim(); if(!nm){ err.hidden=false; err.textContent="Add your name to sign."; return; }
+    tp.signoff.teacher={name:nm, role:document.getElementById("ts-role").value, date:today(), review:document.getElementById("ts-review").value};
+    tp.status="teacher_signed"; const nc=items.filter(s=>s.teacher.comment).length;
+    tp.history.unshift({t:today(),text:"Signed by "+nm}); if(nc) tp.history.unshift({t:today(),text:`${nm} commented on ${nc} adjustment${nc>1?"s":""}`});
+    go("t-done"); }
+  else if(f==="handover"){ const nm=document.getElementById("ho-name").value.trim(), em=document.getElementById("ho-email").value.trim(); if(!nm||!em){ toast("Add the new teacher's name and email"); return; }
+    p.school.teacher=nm; p.school.email=em; const cl=document.getElementById("ho-class"); if(cl) p.school.year=cl.value; const sc=document.getElementById("ho-school"); if(sc&&sc.value) p.school.name=sc.value;
+    p.suggestions.forEach(s=>s.teacher={decision:"",comment:""}); p.status="with_teacher"; p.history.unshift({t:today(),text:"Handed over to "+nm}); toast("Sent to "+nm); go("home"); }
+});
+/* Design import: ?screen=<name> opens one screen with example data, without saving */
+(function(){
+  let sc=null; try{ sc=new URLSearchParams(location.search).get("screen"); }catch(e){}
+  if(!sc) return;
+  window.__noSave=true; S=seed();
+  const [sam,ava,jamie]=S.passports;
+  const parent=r=>{ S.role="parent"; S.signedIn=true; S.route=r; };
+  const teacher=r=>{ S.role="teacher"; S.teacherVerified=true; S.teacherPid=ava.id; S.route=r; };
+  const map={
+    "signin":()=>{ S.route="signin"; },
+    "register":()=>{ S.route="register"; },
+    "home":()=>parent("home"),
+    "settings":()=>parent("settings"),
+    "step1-details":()=>{ S.current=jamie.id; parent("step1"); },
+    "step2-needs":()=>{ S.current=jamie.id; parent("step2"); },
+    "step3-own-words":()=>{ S.current=ava.id; parent("step3"); },
+    "step4-suggestions":()=>{ S.current=ava.id;
+      ava.suggestions[2].status="pending";
+      ava.suggestions[3].status="rejected"; ava.suggestions[3].feedback="She'd rather stay in the library at lunch.";
+      ava.chat=[{who:"bot",text:"I've suggested 4 adjustments from the needs you picked. Is there anything here that wouldn't suit Ava?"},
+                {who:"me",text:"She hates being singled out in front of the class."},
+                {who:"bot",text:"Thanks, that's really useful. I've made sure the ideas don't single her out."}];
+      parent("step4"); },
+    "step5-review-send":()=>{ S.current=ava.id; parent("step5"); },
+    "passport-agreed":()=>{ S.current=sam.id; parent("passport"); },
+    "passport-to-sign":()=>{ S.current=ava.id; ava.status="teacher_signed";
+      ava.suggestions.forEach(x=>x.teacher.decision="yes");
+      ava.signoff.teacher={name:"Mr Khan",role:"Support for learning / ASN teacher",date:"27 Oct 2026",review:"2027-01-27"};
+      parent("passport"); },
+    "review-handover":()=>{ S.current=sam.id; S.review.choice="teacher"; parent("review-due"); },
+    "teacher-email":()=>{ S.role="teacher"; S.teacherVerified=false; S.teacherPid=ava.id; ava.send.msg="Thanks for looking at this. Happy to chat at parents' evening."; S.route="t-email"; },
+    "teacher-code":()=>{ S.role="teacher"; S.teacherVerified=false; S.teacherPid=ava.id; S.route="t-code"; },
+    "teacher-review":()=>{ ava.suggestions[0].teacher.decision="yes";
+      ava.suggestions[1].teacher={decision:"changes",comment:"Happy to give a warning. Supply cover is often last minute, so we'll text you when we can."};
+      teacher("t-review"); },
+    "teacher-home":()=>teacher("t-home")
+  };
+  (map[sc]||map["signin"])();
+})();
+render();
+</script>
+</body>
+</html>
